@@ -1,0 +1,402 @@
+---
+title: "my-vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r,error=TRUE}
+install.packages("blblm")
+library(blblm)
+library(furrr)
+library(foreach)
+library(doParallel)
+library(parallel)
+library(readr)
+library(tidyverse)
+```
+
+
+```{r,error=TRUE,echo=FALSE}
+#' @import purrr
+#' @import stats
+#' @import readr
+#' @import furrr
+#' @importFrom magrittr %>%
+#' @details
+#' Linear Regression with Little Bag of Bootstraps
+"_PACKAGE"
+
+
+## quiets concerns of R CMD check re: the .'s that appear in pipelines
+# from https://github.com/jennybc/googlesheets/blob/master/R/googlesheets.R
+utils::globalVariables(c("."))
+
+#' Parallel bootstrap lm function
+#' @description It's a bootstrap lm function that supports parallelization.
+#' If you want to use parallel computation, run `plan(multiprocess, workers =cl)` first
+#' @param formula Formula for the model
+#' @param file_names A list of files(dataframe) you want to work on
+#' @param B Number of bootstraps
+#' @param cl Number of CPUs you want to use
+#' @return A fitted bootstrap model using parallel computation
+#' @export
+#' @examples
+#' par_blblm(mpg ~ wt * hp,file_names=c("mtcars/1.csv","mtcars/2.csv","mtcars/3.csv"),B=1000,cl=3)
+par_blblm <- function(formula, file_names, B = 1000) {
+
+  estimates <- future_map(file_names,~{
+   df <- read_csv(., col_types = cols())
+   lm_each_subsample(formula = formula, data = df, n = nrow(df), B = B)
+ })
+  res <- list(estimates = estimates, formula = formula)
+  class(res) <- "blblm"
+  invisible(res)
+}
+
+
+
+#' bootstrap lm function
+#' @description It's a bootstrap glm function
+#' @param formula Formula for the model
+#' @param file_names A list of files(dataframe) you want to work on
+#' @param B Number of bootstraps
+#' @return A fitted bootstrap model
+#' @export
+#' @examples
+#' blblm(mpg ~ wt * hp,file_names=c("mtcars/1.csv","mtcars/2.csv","mtcars/3.csv"),B=1000)
+
+blblm <- function(formula, file_names, B = 5000) {
+  m <- length(file_names)
+  estimates <- map(
+     file_names,~{
+       df <- read_csv(.,col_types = cols())
+    lm_each_subsample(formula = formula, data = df, n = nrow(df), B = B)})
+  res <- list(estimates = estimates, formula = formula)
+  class(res) <- "blblm"
+  invisible(res)
+}
+
+#' split data into m parts of approximated equal sizes
+split_data <- function(data, m) {
+  idx <- sample.int(m, nrow(data), replace = TRUE)
+  data %>% split(idx)
+}
+
+
+#' compute the estimates
+lm_each_subsample <- function(formula, data, n, B) {
+  replicate(B, lm_each_boot(formula, data, n), simplify = FALSE)
+}
+
+
+#' compute the regression estimates for a blb dataset
+lm_each_boot <- function(formula, data, n) {
+  freqs <- rmultinom(1, n, rep(1, nrow(data)))
+  lm1(formula, data, freqs)
+}
+
+
+#' estimate the regression estimates based on given the number of repetitions
+lm1 <- function(formula, data, freqs) {
+  # drop the original closure of formula,
+  # otherwise the formula will pick a wront variable from the global scope.
+  environment(formula) <- environment()
+  fit <- lm(formula, data, weights = freqs)
+  list(coef = blbcoef(fit), sigma = blbsigma(fit))
+}
+
+
+#' compute the coefficients from fit
+blbcoef <- function(fit) {
+  coef(fit)
+}
+
+
+#' compute sigma from fit
+blbsigma <- function(fit) {
+  p <- fit$rank
+  y <- model.extract(fit$model, "response")
+  e <- fitted(fit) - y
+  w <- fit$weights
+  sqrt(sum(w * (e^2)) / (sum(w) - p))
+}
+
+#' Print fit formula
+#' @description Print the fit formula
+#' @param x fit
+#' @return Fit formula
+#' @export
+#' @method print blblm
+#' @examples
+#' print(fit)
+print.blblm <- function(x, ...) {
+  cat("blblm model:", capture.output(x$formula))
+  cat("\n")
+}
+
+#' Print sigma
+#' @description Print the sigma of fit
+#' @param object fit
+#' @param confidence Whether to calculate confidence interval
+#' @param level confidence level
+#' @return Sigma of the fit
+#' @export
+#' @method sigma blblm
+#' @examples
+#' sigma(fit,confidence=TRUE,level=0.95)
+sigma.blblm <- function(object, confidence = FALSE, level = 0.95, ...) {
+  est <- object$estimates
+  sigma <- mean(map_dbl(est, ~ mean(map_dbl(., "sigma"))))
+  if (confidence) {
+    alpha <- 1 - 0.95
+    limits <- est %>%
+      map_mean(~ quantile(map_dbl(., "sigma"), c(alpha / 2, 1 - alpha / 2))) %>%
+      set_names(NULL)
+    return(c(sigma = sigma, lwr = limits[1], upr = limits[2]))
+  } else {
+    return(sigma)
+  }
+}
+
+
+#' coefficients of fit
+#' @description Print the coefficients of fit
+#' @param object fit
+#' @return coefficients
+#' @export
+#' @method coef blblm
+#' @examples
+#' coef(fit)
+coef.blblm <- function(object, ...) {
+  est <- object$estimates
+  map_mean(est, ~ map_cbind(., "coef") %>% rowMeans())
+}
+
+
+
+#' Confidence interval of fit
+#' @description Print the confidence interval of fit
+#' @param object fit
+#' @param level confidence level
+#' @return coefficients
+#' @export
+#' @method confint blblm
+#' @examples
+#' confint(fit,parm=NULL,level=0.95)
+confint.blblm <- function(object, parm = NULL, level = 0.95, ...) {
+  if (is.null(parm)) {
+    parm <- attr(terms(fit$formula), "term.labels")
+  }
+  alpha <- 1 - level
+  est <- object$estimates
+  out <- map_rbind(parm, function(p) {
+    map_mean(est, ~ map_dbl(., list("coef", p)) %>% quantile(c(alpha / 2, 1 - alpha / 2)))
+  })
+  if (is.vector(out)) {
+    out <- as.matrix(t(out))
+  }
+  dimnames(out)[[1]] <- parm
+  out
+}
+
+#' Predict the model
+#' @description Predict the fitted model
+#' @param object fit
+#' @param new_data The data you want to predict
+#' @param level confidence level
+#' @return coefficients
+#' @export
+#' @method predict blblm
+#' @examples
+#' predict(object, new_data, confidence = TRUE, level = 0.95)
+predict.blblm <- function(object, new_data, confidence = FALSE, level = 0.95, ...) {
+  est <- object$estimates
+  X <- model.matrix(reformulate(attr(terms(object$formula), "term.labels")), new_data)
+  if (confidence) {
+    map_mean(est, ~ map_cbind(., ~ X %*% .$coef) %>%
+      apply(1, mean_lwr_upr, level = level) %>%
+      t())
+  } else {
+    map_mean(est, ~ map_cbind(., ~ X %*% .$coef) %>% rowMeans())
+  }
+}
+
+
+mean_lwr_upr <- function(x, level = 0.95) {
+  alpha <- 1 - level
+  c(fit = mean(x), quantile(x, c(alpha / 2, 1 - alpha / 2)) %>% set_names(c("lwr", "upr")))
+}
+
+map_mean <- function(.x, .f, ...) {
+  (map(.x, .f, ...) %>% reduce(`+`)) / length(.x)
+}
+
+map_cbind <- function(.x, .f, ...) {
+  map(.x, .f, ...) %>% reduce(cbind)
+}
+
+map_rbind <- function(.x, .f, ...) {
+  map(.x, .f, ...) %>% reduce(rbind)
+}
+#######################################
+glm1 <- function(formula, data, freqs) {
+  # drop the original closure of formula,
+  # otherwise the formula will pick a wront variable from the global scope.
+  environment(formula) <- environment()
+  fit <- glm(formula, family = binomial(link = "logit"), data, weights = freqs)
+  list(coef = blbcoef(fit))
+}
+
+glm_each_boot <- function(formula, data, n) {
+  freqs <- rmultinom(1, n, rep(1, nrow(data)))
+  glm1(formula, data, freqs)
+}
+
+glm_each_subsample <- function(formula, data, n, B) {
+  replicate(B, glm_each_boot(formula, data, n), simplify = FALSE)
+}
+
+
+
+
+#' Parallel bootstrap glm function
+#' @description It's a bootstrap glm function that supports parallelization.
+#' If you want to use parallel computation, run `plan(multiprocess, workers =cl)` first
+#' @param formula Formula for the model
+#' @param file_names A list of files(dataframe) you want to work on
+#' @param B Number of bootstraps
+#' @param cl Number of CPUs you want to use
+#' @return A fitted bootstrap model using parallel computation
+#' @export
+#' @examples
+#' par_blbglm(mpg ~ wt * hp,file_names=c("mtcars/1.csv","mtcars/2.csv","mtcars/3.csv"),B=1000,cl=3)
+par_blbglm <- function(formula, file_names, B = 1000,cl=1) {
+  estimates <- future_map(file_names,~{
+    df <- read_csv(., col_types = cols())
+    glm_each_subsample(formula = formula, data = df, n = nrow(df), B = B)
+  })
+  res <- list(estimates = estimates, formula = formula)
+  class(res) <- "blblm"
+  invisible(res)
+}
+
+
+#' bootstrap glm function
+#' @description It's a bootstrap glm function
+#' @param formula Formula for the model
+#' @param file_names A list of files(dataframe) you want to work on
+#' @param B Number of bootstraps
+#' @return A fitted bootstrap model
+#' @export
+#' @examples
+#' blbglm(mpg ~ wt * hp,file_names=c("mtcars/1.csv","mtcars/2.csv","mtcars/3.csv"),B=1000)
+blbglm <- function(formula, file_names, B = 5000) {
+  m <- length(file_names)
+  estimates <- map(
+    file_names,~{
+      df <- read_csv(.,col_types = cols())
+      glm_each_subsample(formula = formula, data = df, n = nrow(df), B = B)})
+  res <- list(estimates = estimates, formula = formula)
+  class(res) <- "blblm"
+  invisible(res)
+}
+
+#' Predict categorical variables
+#' @description
+#' @param fit A fit generated by blblm
+#' @param testdatas A dataframe contain the variables you want to use to predict
+#' @param confidence Whether you want to use confidence interval
+#' @return The probabilities of predicting categorical variables
+#' @method confident blbglm
+#' @export
+predict.blbglm <- function(fit, testdata, confidence = FALSE){
+  coef <- map(fit$estimates, ~map(., "coef") %>% reduce(., rbind))
+  X<-model.matrix(reformulate(attr(terms(fit$formula), "term.labels")), testdata)
+  t<-map(coef,~apply(.,1,function(y)X%*%y))%>%
+    map(.,rowMeans)
+    t <- reduce(t,`+`)/length(t)
+  if(confidence){
+    map(coef,~apply(.,1,function(y)X%*%y))%>%
+      map(.,data.frame)%>%
+      map(.,~apply(.,1,function(x)exp(x)/(1+exp(x))))%>%
+      map(.,~apply(.,2,function(x)quantile(x,c(0.025,0.975))))%>%
+      reduce(`+`)/length(coef)
+  }
+  else{
+    print(exp(t)/(1+exp(t)))}
+}
+
+```
+
+```{r}
+m <- 3
+groups <- sample(seq_len(m), nrow(mtcars), replace = TRUE)
+mtcars$group <- groups
+dir.create("mtcars/", showWarnings = FALSE)
+# for (i in seq_len(m)) {
+#   write_csv(mtcars[which(mtcars$group==i),], str_c("mtcars/", i, ".csv"))
+# }
+file_names <- file.path("mtcars", list.files("mtcars"))
+```
+
+
+I did some improvements to the function `blblm`. I allow users to specify a list of file names to run the model.
+```{r}
+fit1 <- blblm(mpg ~ wt,file_names,B=2000)
+coef(fit1)
+sigma(fit1)
+confint(fit1, "wt")
+predict(fit1, data.frame(wt = c(2.5, 3,3.5)),confidence=TRUE)
+```
+I created a `par_blblm` funtion, which allow users to do the parallel computation. Users can decide how many CPUs they want to use in the computation.
+
+`par_blblm` require users to make clusters so that they can use more CPUs.
+Make clusters
+```{r,error=TRUE}
+suppressWarnings(plan(multiprocess, workers =4))
+```
+```{r}
+fit2 <- par_blblm(mpg ~ wt,file_names,B=2000)
+coef(fit2)
+sigma(fit2)
+confint(fit2, "wt")
+predict(fit2, data.frame(wt = c(2.5, 3,3.5)),confidence=TRUE)
+```
+I use `bench::mark to compare` their efficiency. `par_blblm` is much faster, and using less memory:
+```{r}
+bench::mark(blblm(mpg ~ wt,file_names,B=2000),
+            par_blblm(mpg ~ wt,file_names,B=2000),
+            check=FALSE)
+```
+
+I also introduced `blbglm` function, which is more powerful than `blblm`
+```{r,error=TRUE}
+suppressWarnings(fit3 <- blbglm(vs ~ wt,file_names,B=1000))
+coef(fit3)
+confint(fit3, "wt")
+predict(fit3, data.frame(wt = c(2.5, 3,3.5)),confidence=TRUE)
+```
+Also `par_blbglm` function
+```{r,error=TRUE}
+suppressWarnings(fit4 <- par_blbglm(am ~ hp,file_names,B=1000))
+coef(fit4)
+confint(fit4, "hp")
+predict(fit4, data.frame(hp = c(150,200)),confidence=TRUE)
+```
+
+Function `predict.blbglm` can predict categorical variables and return their probabilities
+```{r}
+fit5 <- blblm(am ~ wt*disp,file_names,B=50)
+predict.blbglm(fit5, data.frame(wt = c(2.5, 3,3.5,4,4.5,5),disp=c(150,160,220,140,170,180)),confidence=FALSE)
+```
+

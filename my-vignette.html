@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>my-vignette</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">my-vignette</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">install.packages</span>(<span class="st">&quot;blblm&quot;</span>)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="co">#&gt; Error in contrib.url(repos, &quot;source&quot;): trying to use CRAN without setting a mirror</span></a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="kw">library</span>(blblm)</a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="co">#&gt; Error in library(blblm): there is no package called &#39;blblm&#39;</span></a>
+<a class="sourceLine" id="cb1-5" title="5"><span class="kw">library</span>(furrr)</a>
+<a class="sourceLine" id="cb1-6" title="6"><span class="co">#&gt; Loading required package: future</span></a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="kw">library</span>(foreach)</a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="kw">library</span>(doParallel)</a>
+<a class="sourceLine" id="cb1-9" title="9"><span class="co">#&gt; Loading required package: iterators</span></a>
+<a class="sourceLine" id="cb1-10" title="10"><span class="co">#&gt; Loading required package: parallel</span></a>
+<a class="sourceLine" id="cb1-11" title="11"><span class="kw">library</span>(parallel)</a>
+<a class="sourceLine" id="cb1-12" title="12"><span class="kw">library</span>(readr)</a>
+<a class="sourceLine" id="cb1-13" title="13"><span class="kw">library</span>(tidyverse)</a>
+<a class="sourceLine" id="cb1-14" title="14"><span class="co">#&gt; -- Attaching packages ---------------------------- tidyverse 1.3.0 --</span></a>
+<a class="sourceLine" id="cb1-15" title="15"><span class="co">#&gt; √ ggplot2 3.3.0     √ dplyr   0.8.5</span></a>
+<a class="sourceLine" id="cb1-16" title="16"><span class="co">#&gt; √ tibble  3.0.1     √ stringr 1.4.0</span></a>
+<a class="sourceLine" id="cb1-17" title="17"><span class="co">#&gt; √ tidyr   1.0.2     √ forcats 0.5.0</span></a>
+<a class="sourceLine" id="cb1-18" title="18"><span class="co">#&gt; √ purrr   0.3.3</span></a>
+<a class="sourceLine" id="cb1-19" title="19"><span class="co">#&gt; -- Conflicts ------------------------------- tidyverse_conflicts() --</span></a>
+<a class="sourceLine" id="cb1-20" title="20"><span class="co">#&gt; x purrr::accumulate() masks foreach::accumulate()</span></a>
+<a class="sourceLine" id="cb1-21" title="21"><span class="co">#&gt; x dplyr::filter()     masks stats::filter()</span></a>
+<a class="sourceLine" id="cb1-22" title="22"><span class="co">#&gt; x dplyr::lag()        masks stats::lag()</span></a>
+<a class="sourceLine" id="cb1-23" title="23"><span class="co">#&gt; x purrr::when()       masks foreach::when()</span></a></code></pre></div>
+<pre><code>#&gt; [1] &quot;_PACKAGE&quot;
+#&gt; [1] &quot;.&quot;</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">m &lt;-<span class="st"> </span><span class="dv">3</span></a>
+<a class="sourceLine" id="cb3-2" title="2">groups &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">seq_len</span>(m), <span class="kw">nrow</span>(mtcars), <span class="dt">replace =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-3" title="3">mtcars<span class="op">$</span>group &lt;-<span class="st"> </span>groups</a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="kw">dir.create</span>(<span class="st">&quot;mtcars/&quot;</span>, <span class="dt">showWarnings =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co"># for (i in seq_len(m)) {</span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co">#   write_csv(mtcars[which(mtcars$group==i),], str_c(&quot;mtcars/&quot;, i, &quot;.csv&quot;))</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co"># }</span></a>
+<a class="sourceLine" id="cb3-8" title="8">file_names &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="st">&quot;mtcars&quot;</span>, <span class="kw">list.files</span>(<span class="st">&quot;mtcars&quot;</span>))</a></code></pre></div>
+<p>I did some improvements to the function <code>blblm</code>. I allow users to specify a list of file names to run the model.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">fit1 &lt;-<span class="st"> </span><span class="kw">blblm</span>(mpg <span class="op">~</span><span class="st"> </span>wt,file_names,<span class="dt">B=</span><span class="dv">2000</span>)</a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="kw">coef</span>(fit1)</a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="co">#&gt; (Intercept)          wt </span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&gt;    37.80925    -5.58198</span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="kw">sigma</span>(fit1)</a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt; [1] 2.735547</span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="kw">confint</span>(fit1, <span class="st">&quot;wt&quot;</span>)</a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt;         2.5%     97.5%</span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt; wt -8.416913 -3.298962</span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="kw">predict</span>(fit1, <span class="kw">data.frame</span>(<span class="dt">wt =</span> <span class="kw">c</span>(<span class="fl">2.5</span>, <span class="dv">3</span>,<span class="fl">3.5</span>)),<span class="dt">confidence=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt;        fit      lwr      upr</span></a>
+<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&gt; 1 23.85430 21.08085 26.23828</span></a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="co">#&gt; 2 21.06331 19.11860 23.04106</span></a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt; 3 18.27232 16.04454 20.25154</span></a></code></pre></div>
+<p>I created a <code>par_blblm</code> funtion, which allow users to do the parallel computation. Users can decide how many CPUs they want to use in the computation.</p>
+<p><code>par_blblm</code> require users to make clusters so that they can use more CPUs. Make clusters</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">suppressWarnings</span>(<span class="kw">plan</span>(multiprocess, <span class="dt">workers =</span><span class="dv">4</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">fit2 &lt;-<span class="st"> </span><span class="kw">par_blblm</span>(mpg <span class="op">~</span><span class="st"> </span>wt,file_names,<span class="dt">B=</span><span class="dv">2000</span>)</a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw">coef</span>(fit2)</a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="co">#&gt; (Intercept)          wt </span></a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="co">#&gt;   37.739357   -5.562116</span></a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="kw">sigma</span>(fit2)</a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="co">#&gt; [1] 2.728063</span></a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="kw">confint</span>(fit2, <span class="st">&quot;wt&quot;</span>)</a>
+<a class="sourceLine" id="cb6-8" title="8"><span class="co">#&gt;         2.5%     97.5%</span></a>
+<a class="sourceLine" id="cb6-9" title="9"><span class="co">#&gt; wt -8.366959 -3.290487</span></a>
+<a class="sourceLine" id="cb6-10" title="10"><span class="kw">predict</span>(fit2, <span class="kw">data.frame</span>(<span class="dt">wt =</span> <span class="kw">c</span>(<span class="fl">2.5</span>, <span class="dv">3</span>,<span class="fl">3.5</span>)),<span class="dt">confidence=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb6-11" title="11"><span class="co">#&gt;        fit      lwr      upr</span></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="co">#&gt; 1 23.83407 21.08465 26.29699</span></a>
+<a class="sourceLine" id="cb6-13" title="13"><span class="co">#&gt; 2 21.05301 19.13210 23.03534</span></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&gt; 3 18.27195 15.99020 20.25286</span></a></code></pre></div>
+<p>I use <code>bench::mark to compare</code> their efficiency. <code>par_blblm</code> is much faster, and using less memory:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">bench<span class="op">::</span><span class="kw">mark</span>(<span class="kw">blblm</span>(mpg <span class="op">~</span><span class="st"> </span>wt,file_names,<span class="dt">B=</span><span class="dv">2000</span>),</a>
+<a class="sourceLine" id="cb7-2" title="2">            <span class="kw">par_blblm</span>(mpg <span class="op">~</span><span class="st"> </span>wt,file_names,<span class="dt">B=</span><span class="dv">2000</span>),</a>
+<a class="sourceLine" id="cb7-3" title="3">            <span class="dt">check=</span><span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb7-4" title="4"><span class="co">#&gt; Warning: Some expressions had a GC in every iteration; so filtering is disabled.</span></a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="co">#&gt; # A tibble: 2 x 6</span></a>
+<a class="sourceLine" id="cb7-6" title="6"><span class="co">#&gt;   expression                                  min median `itr/sec` mem_alloc</span></a>
+<a class="sourceLine" id="cb7-7" title="7"><span class="co">#&gt;   &lt;bch:expr&gt;                                &lt;bch&gt; &lt;bch:&gt;     &lt;dbl&gt; &lt;bch:byt&gt;</span></a>
+<a class="sourceLine" id="cb7-8" title="8"><span class="co">#&gt; 1 blblm(mpg ~ wt, file_names, B = 2000)     6.48s  6.48s     0.154   16.74MB</span></a>
+<a class="sourceLine" id="cb7-9" title="9"><span class="co">#&gt; 2 par_blblm(mpg ~ wt, file_names, B = 2000) 2.25s  2.25s     0.444    1.71MB</span></a>
+<a class="sourceLine" id="cb7-10" title="10"><span class="co">#&gt; # ... with 1 more variable: `gc/sec` &lt;dbl&gt;</span></a></code></pre></div>
+<p>I also introduced <code>blbglm</code> function, which is more powerful than <code>blblm</code></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">suppressWarnings</span>(fit3 &lt;-<span class="st"> </span><span class="kw">blbglm</span>(vs <span class="op">~</span><span class="st"> </span>wt,file_names,<span class="dt">B=</span><span class="dv">1000</span>))</a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="kw">coef</span>(fit3)</a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co">#&gt; (Intercept)          wt </span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co">#&gt;   295.77283   -91.88305</span></a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="kw">confint</span>(fit3, <span class="st">&quot;wt&quot;</span>)</a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co">#&gt;         2.5%      97.5%</span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="co">#&gt; wt -756.1592 -0.3869641</span></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="kw">predict</span>(fit3, <span class="kw">data.frame</span>(<span class="dt">wt =</span> <span class="kw">c</span>(<span class="fl">2.5</span>, <span class="dv">3</span>,<span class="fl">3.5</span>)),<span class="dt">confidence=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="co">#&gt;         fit         lwr        upr</span></a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="co">#&gt; 1  66.06521   -4.565209 516.750818</span></a>
+<a class="sourceLine" id="cb8-11" title="11"><span class="co">#&gt; 2  20.12369  -25.221411 140.802451</span></a>
+<a class="sourceLine" id="cb8-12" title="12"><span class="co">#&gt; 3 -25.81783 -273.757254   7.483761</span></a></code></pre></div>
+<p>Also <code>par_blbglm</code> function</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">suppressWarnings</span>(fit4 &lt;-<span class="st"> </span><span class="kw">par_blbglm</span>(am <span class="op">~</span><span class="st"> </span>hp,file_names,<span class="dt">B=</span><span class="dv">1000</span>))</a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="kw">coef</span>(fit4)</a>
+<a class="sourceLine" id="cb9-3" title="3"><span class="co">#&gt; (Intercept)          hp </span></a>
+<a class="sourceLine" id="cb9-4" title="4"><span class="co">#&gt;  177.730370   -1.681571</span></a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="kw">confint</span>(fit4, <span class="st">&quot;hp&quot;</span>)</a>
+<a class="sourceLine" id="cb9-6" title="6"><span class="co">#&gt;         2.5%     97.5%</span></a>
+<a class="sourceLine" id="cb9-7" title="7"><span class="co">#&gt; hp -14.76813 0.7668028</span></a>
+<a class="sourceLine" id="cb9-8" title="8"><span class="kw">predict</span>(fit4, <span class="kw">data.frame</span>(<span class="dt">hp =</span> <span class="kw">c</span>(<span class="dv">150</span>,<span class="dv">200</span>)),<span class="dt">confidence=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb9-9" title="9"><span class="co">#&gt;         fit        lwr       upr</span></a>
+<a class="sourceLine" id="cb9-10" title="10"><span class="co">#&gt; 1  -74.5053  -730.2837 1.0576445</span></a>
+<a class="sourceLine" id="cb9-11" title="11"><span class="co">#&gt; 2 -158.5839 -1427.6355 0.7723582</span></a></code></pre></div>
+<p>Function <code>predict.blbglm</code> can predict categorical variables and return their probabilities</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">fit5 &lt;-<span class="st"> </span><span class="kw">blblm</span>(am <span class="op">~</span><span class="st"> </span>wt<span class="op">*</span>disp,file_names,<span class="dt">B=</span><span class="dv">50</span>)</a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="kw">predict.blbglm</span>(fit5, <span class="kw">data.frame</span>(<span class="dt">wt =</span> <span class="kw">c</span>(<span class="fl">2.5</span>, <span class="dv">3</span>,<span class="fl">3.5</span>,<span class="dv">4</span>,<span class="fl">4.5</span>,<span class="dv">5</span>),<span class="dt">disp=</span><span class="kw">c</span>(<span class="dv">150</span>,<span class="dv">160</span>,<span class="dv">220</span>,<span class="dv">140</span>,<span class="dv">170</span>,<span class="dv">180</span>)),<span class="dt">confidence=</span><span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="co">#&gt; [1] 0.6789961 0.6228886 0.5659640 0.5014214 0.4435410 0.3865011</span></a></code></pre></div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
